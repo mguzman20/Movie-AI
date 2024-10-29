@@ -12,7 +12,7 @@ TEXT_DIR = "clean_scripts"  # Directory containing text files
 pc = Pinecone(api_key="")
 INDEX_NAME = 'scripts'
 
-def initialize_faiss_index(embedding_dim: int):
+def initialize_index(embedding_dim: int):
     if INDEX_NAME not in pc.list_indexes():
         pc.create_index(
             name=INDEX_NAME,
