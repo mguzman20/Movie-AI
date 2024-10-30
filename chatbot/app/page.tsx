@@ -106,13 +106,13 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-screen w-full max-w-3xl flex-col items-center mx-auto py-6">
+    <main className="flex h-full w-full max-w-3xl flex-col items-center mx-auto pb-6 pt-20">
       <ChatMessageList ref={messagesRef}>
         {/* Initial Message */}
         {messages.length === 0 && (
-          <div className="w-full bg-background shadow-sm border rounded-lg p-8 flex flex-col gap-2">
-            <h1 className="font-bold">Welcome to a movie Ai Chatbot</h1>
-            <p className="text-muted-foreground text-sm">
+          <div className="w-full shadow-sm border rounded-lg p-8 flex flex-col justify-center items-center gap-2">
+            <h1 className="font-bold text-2xl">Welcome to a movie Ai Chatbot</h1>
+            <p className="text-center">
               Ask me anything about <b>Star wars</b> or <b>Lord of the rings</b>. I will try my best to answer your questions.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function Home() {
             value={input}
             onKeyDown={onKeyDown}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message here..."
+            placeholder="Type a question about Star Wars or The Lord of the rings..."
             className="min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
           />
           <div className="flex items-center p-3 pt-0">
