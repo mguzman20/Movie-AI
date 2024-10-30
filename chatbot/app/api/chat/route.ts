@@ -1,6 +1,6 @@
 'use server'
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
 
 const pinecone = new Pinecone({
@@ -9,8 +9,8 @@ const pinecone = new Pinecone({
 
 const INDEX_NAME = process.env.PINECONE_INDEX_NAME || '';
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
-    const { query } = req.body
+export async function POST(req: NextRequest, res: NextResponse) {
+    const { query } = await req.json();
   
     try {
         // Retrieve context from the Pinecone index based on the query
@@ -32,10 +32,10 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         const data = await response.json();
         // Return the response from the LLM model
-        res.status(200).json(data.response);
+        return NextResponse.json(data.response, { status: 200 });
     } catch (error) {
         console.error("Error processing request:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 
