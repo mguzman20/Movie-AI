@@ -30,13 +30,36 @@ export async function POST(req: NextRequest, res: NextResponse) {
                     If you don't know the answer, just say that you don't know, don't try to make up an answer.
                     
                     ${context.map(c => `${c.movie}: ${c.text}`).join('\n')}`, */
-                stream: false
+                stream: true
             }),
         });
 
-        const data = await response.json();
-        // Return the response from the LLM model
-        return NextResponse.json(data.response, { status: 200 });
+        const stream = new ReadableStream({
+            async start(controller) {
+                if (!response.body) {
+                    throw new Error("Response body is null");
+                }
+                const reader = response.body.getReader();
+
+                // Read chunks from the model's response and enqueue them to the stream
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    // Push each chunk to the controller
+                    controller.enqueue(value);
+                }
+                controller.close();
+            },
+        });
+
+        return new NextResponse(stream, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+            },
+        });
     } catch (error) {
         console.error("Error processing request:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

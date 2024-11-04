@@ -60,10 +60,39 @@ export default function Home() {
         body: JSON.stringify({ message: input }),
       });
 
-      const data = await response.json();
-      const aiMessage = { role: "assistant", content: data };
+      if (!response.body) {
+        throw new Error("Response body is null");
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiMessage = { role: "assistant", content: "" };
 
-      setMessages((prev) => [...prev, aiMessage]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk and try to parse it immediately as JSON
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim() !== "");
+        for (const line of lines) {
+          try {
+              // Parse each line as a JSON object
+              const jsonResponse = JSON.parse(line);
+
+              // Append the response to aiMessage content
+              aiMessage.content += jsonResponse.response;
+              
+              // Update messages to display the current content
+              setMessages((prev) => [...prev.filter(m => m.role !== 'assistant'), aiMessage]);
+
+              // Break if the JSON response is marked as done
+              if (jsonResponse.done) break;
+              
+          } catch (error) {
+              console.warn("Failed to parse JSON chunk:", error);
+          }
+      }
+    }
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
