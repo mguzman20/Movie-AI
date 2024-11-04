@@ -10,11 +10,12 @@ const pinecone = new Pinecone({
 const INDEX_NAME = process.env.PINECONE_INDEX_NAME || '';
 
 export async function POST(req: NextRequest, res: NextResponse) {
-    const { query } = await req.json();
+    const { message } = await req.json();
+
   
     try {
         // Retrieve context from the Pinecone index based on the query
-        const context = await fetchContextFromPinecone(query);
+        const context = await fetchContextFromPinecone(message) as { movie: string, text: string }[];
 
         // Send the context and the query to the LLM model
         const response = await fetch('http://tormenta.ing.puc.cl/api/generate', {
@@ -24,8 +25,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
             },
             body: JSON.stringify({
                 model: 'integra-LLM',
-                prompt: query,
-                context: context,
+                prompt: message,
+                /* context: `Use the following pieces of context to answer the users question. 
+                    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+                    
+                    ${context.map(c => `${c.movie}: ${c.text}`).join('\n')}`, */
                 stream: false
             }),
         });
@@ -78,5 +82,6 @@ async function getQueryEmbedding(query: string) {
     });
 
     const data = await response.json();
-    return data.data.embeddings[0]; // Adjust based on your embedding response structure
+
+    return data.embeddings[0] as number[]; // Adjust based on your embedding response structure
 }

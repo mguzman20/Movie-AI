@@ -61,7 +61,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-      const aiMessage = { role: "assistant", content: data.reply };
+      const aiMessage = { role: "assistant", content: data };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
