@@ -17,7 +17,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
         const context = await fetchContextFromPinecone(query);
 
         // Send the context and the query to the LLM model
-        const response = await fetch('https://tormenta.ing.puc.cl/api/generate', {
+        const response = await fetch('http://tormenta.ing.puc.cl/api/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,13 +65,10 @@ async function fetchContextFromPinecone(query: string) {
 
 // Placeholder function for getting query embeddings (implement as needed)
 async function getQueryEmbedding(query: string) {
-    // Here you would typically call your embedding service/API to convert the query into a vector
-    // For example, using OpenAI's embedding API:
     
-    const response = await fetch('https://tormenta.ing.puc.cl/api/embed', {
+    const response = await fetch('http://tormenta.ing.puc.cl/api/embed', {
         method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, // Your OpenAI API key
+        headers: { // Your OpenAI API key
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -81,5 +78,5 @@ async function getQueryEmbedding(query: string) {
     });
 
     const data = await response.json();
-    return data.data.embeddings; // Adjust based on your embedding response structure
+    return data.data.embeddings[0]; // Adjust based on your embedding response structure
 }
