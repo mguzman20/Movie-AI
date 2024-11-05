@@ -9,7 +9,7 @@ API_URL = "http://tormenta.ing.puc.cl/api/embed"
 HEADERS = {"Content-Type": "application/json"}
 TEXT_DIR = "clean_scripts"  # Directory containing text files
 
-pc = Pinecone(api_key="8e2da5ef-e270-43ac-b205-f62c1e7daff1")
+pc = Pinecone(api_key="")
 INDEX_NAME = 'scripts'
 
 
