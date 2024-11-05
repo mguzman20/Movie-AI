@@ -35,7 +35,10 @@ export default function Navbar({ className }: React.HTMLAttributes<HTMLElement>)
         </Link>
       </div>
       <div className="flex items-center space-x-4">
-        <User />
+      <Button variant="ghost" size="icon" className="">
+            <User />
+            <span className="sr-only">Toggle menu</span>
+        </Button>
         <Button variant="ghost" size="icon" className="">
             <Menu />
             <span className="sr-only">Toggle menu</span>

@@ -135,8 +135,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex h-full w-full max-w-3xl flex-col items-center mx-auto pb-6 pt-20">
-      <ChatMessageList ref={messagesRef}>
+    <main className="flex h-full w-full max-w-4xl flex-col items-center mx-auto pb-6 pt-20">
+      <ChatMessageList ref={messagesRef} className="">
         {/* Initial Message */}
         {messages.length === 0 && (
           <div className="w-full shadow-sm border rounded-lg p-8 flex flex-col justify-center items-center gap-2">
@@ -144,6 +144,13 @@ export default function Home() {
             <p className="text-center">
               Ask me anything about <b>Star wars</b> or <b>Lord of the rings</b>. I will try my best to answer your questions.
             </p>
+            <p>Movies that you can ask</p>
+            <ul className=" list-disc [&>li]:mt-2">
+              <li>1st level of puns: 5 gold coins</li>
+              <li>2nd level of jokes: 10 gold coins</li>
+              <li>3rd level of one-liners : 20 gold coins</li>
+            </ul>
+
           </div>
         )}
 
@@ -217,7 +224,7 @@ export default function Home() {
         <form
           ref={formRef}
           onSubmit={onSubmit}
-          className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+          className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring max-w-3xl mx-auto"
         >
           <ChatInput
             value={input}
