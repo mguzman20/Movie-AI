@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
   
     try {
         // Retrieve context from the Pinecone index based on the query
-        const context = await fetchContextFromPinecone(message) as { movie: string, text: string }[];
+        /* const context = await fetchContextFromPinecone(message) as { movie: string, text: string }[]; */
 
         // Send the context and the query to the LLM model
         const response = await fetch('http://tormenta.ing.puc.cl/api/generate', {
@@ -33,6 +33,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 stream: true
             }),
         });
+
+        console.log(response);
 
         const stream = new ReadableStream({
             async start(controller) {
