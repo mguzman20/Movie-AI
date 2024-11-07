@@ -144,12 +144,17 @@ export default function Home() {
             <p className="text-center">
               Ask me anything about <b>Star wars</b> or <b>Lord of the rings</b>. I will try my best to answer your questions.
             </p>
-            <p>Movies that you can ask</p>
-            <ul className=" list-disc [&>li]:mt-2">
-              <li>1st level of puns: 5 gold coins</li>
-              <li>2nd level of jokes: 10 gold coins</li>
-              <li>3rd level of one-liners : 20 gold coins</li>
-            </ul>
+            <p className="text-left text-xl font-bold">Movies that you can ask</p>
+            <p>Star Wars: Episode IV - A New Hope,
+Star Wars: Episode V - The Empire Strikes Back,
+Star Wars: Episode VI - Return of the Jedi,
+Star Wars: Episode I - The Phantom Menace,
+Star Wars: Episode II - Attack of the Clones,
+Star Wars: Episode III - Revenge of the Sith,
+Star Wars: Episode VII - The Force Awakens</p>
+            <p>The Lord of the Rings: The Fellowship of the Ring,
+The Lord of the Rings: The Two Towers,
+The Lord of the Rings: The Return of the King</p>
 
           </div>
         )}
