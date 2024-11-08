@@ -27,16 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={``}
-      >
+      <body>
         <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
-        <div className="text-white dark absolute inset-0 -z-10 h-full w-full items-center [background:radial-gradient(125%_125%_at_50%_10%,#000_30%,#39035A_100%)]">
+        <div className="text-white dark h-screen [background:radial-gradient(125%_125%_at_50%_10%,#000_30%,#39035A_100%)]">
           <Navbar />
           {children}
         </div>

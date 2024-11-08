@@ -10,21 +10,22 @@ const pinecone = new Pinecone({
 const INDEX_NAME = process.env.PINECONE_INDEX_NAME || '';
 
 export async function POST(req: NextRequest) {
-    const { message } = await req.json();
+    const { message, movie } = await req.json();
 
   
     try {
         // Retrieve context from the Pinecone index based on the query
-        const context = await fetchContextFromPinecone(message) as { movie: string, text: string }[];
+        const context = await fetchContextFromPinecone(message, movie) as { movie: string, text: string }[];
 
         const formattedContext = context.map(
-            ({ movie, text }) => `Movie: ${movie}\nExcerpt: ${text}`
+            ({ movie, text }) => `Extract: ${text}`
         ).join('\n\n');
 
         const prompt = `
         You are a knowledgeable assistant. Use the provided context to answer the user’s query as accurately as possible. If the context does not directly address the query, provide the best answer based on your general knowledge.
 
         Context:
+        Movie: ${movie}
         ${formattedContext}
 
         Query:
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
 
         Answer:
         `;
+
+        console.log("Prompt:", prompt);
 
 
         // Send the context and the query to the LLM model
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Function to fetch context from Pinecone based on the query
-async function fetchContextFromPinecone(query: string) {
+async function fetchContextFromPinecone(query: string, movie: string) {
     // Create an embedding for the query using your preferred method (e.g., OpenAI embeddings)
     const queryEmbedding = await getQueryEmbedding(query); // Implement this function to get embeddings
 
@@ -93,8 +96,11 @@ async function fetchContextFromPinecone(query: string) {
     const index = pinecone.index(INDEX_NAME);
     const queryResponse = await index.query({
         vector: queryEmbedding,
-        topK: 5, // Adjust this based on how many results you want
+        topK: 10, // Adjust this based on how many results you want
         includeMetadata: true,
+        filter: {
+            "movie": {"$eq": movie}
+        }
     });
 
     // Extract relevant context from the response

@@ -6,6 +6,14 @@ import {
   ChatBubbleAvatar,
   ChatBubbleMessage,
 } from "@/components/ui/chat/chat-bubble";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 import { ChatInput } from "@/components/ui/chat/chat-input";
 import { ChatMessageList } from "@/components/ui/chat/chat-message-list";
 import { Button } from "@/components/ui/button";
@@ -21,7 +29,7 @@ import { useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { send } from "process";
+import "./globals.css";
 
 const ChatAiIcons = [
   { icon: CopyIcon, label: "Copy" },
@@ -33,6 +41,7 @@ export default function Home() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [movie, setMovie] = useState("");
   const messagesRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -45,6 +54,7 @@ export default function Home() {
 
   const sendMessage = async () => {
     if (!input) return;
+    if (!movie) return;
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -57,7 +67,7 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: input, movie: movie}),
       });
 
       if (!response.body) {
@@ -138,25 +148,59 @@ export default function Home() {
     <main className="flex h-full w-full max-w-4xl flex-col items-center mx-auto pb-6 pt-20">
       <ChatMessageList ref={messagesRef} className="">
         {/* Initial Message */}
-        {messages.length === 0 && (
+        {messages.length === 0 ? (
           <div className="w-full shadow-sm border rounded-lg p-8 flex flex-col justify-center items-center gap-2">
             <h1 className="font-bold text-2xl">Welcome to a movie Ai Chatbot</h1>
             <p className="text-center">
               Ask me anything about <b>Star wars</b> or <b>Lord of the rings</b>. I will try my best to answer your questions.
             </p>
-            <p className="text-left text-xl font-bold">Movies that you can ask</p>
-            <p>Star Wars: Episode IV - A New Hope,
-Star Wars: Episode V - The Empire Strikes Back,
-Star Wars: Episode VI - Return of the Jedi,
-Star Wars: Episode I - The Phantom Menace,
-Star Wars: Episode II - Attack of the Clones,
-Star Wars: Episode III - Revenge of the Sith,
-Star Wars: Episode VII - The Force Awakens</p>
-            <p>The Lord of the Rings: The Fellowship of the Ring,
-The Lord of the Rings: The Two Towers,
-The Lord of the Rings: The Return of the King</p>
+            <p className="text-left text-xl font-bold">Chose a movie to start</p>
+            <Select
+              value={movie}
+              onValueChange={setMovie}
+            >
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder='Select a movie' />
+              </SelectTrigger>
+              <SelectContent className="dark">
+                    <SelectItem value="Star Wars: The Phantom Menace.txt">Star Wars: The Phantom Menace</SelectItem>
+                    <SelectItem value="Star Wars: Attack of the Clones.txt">Star Wars: Attack of the Clones</SelectItem>
+                    <SelectItem value="Star Wars: Revenge of the Sith.txt">Star Wars: Revenge of the Sith</SelectItem>
+                    <SelectItem value="Star Wars: A New Hope.txt">Star Wars: A New Hope</SelectItem>
+                    <SelectItem value="Star Wars: The Empire Strikes Back.txt">Star Wars: The Empire Strikes Back</SelectItem>
+                    <SelectItem value="Star Wars: Return of the Jedi.txt">Star Wars: Return of the Jedi</SelectItem>
+                    <SelectItem value="Star Wars: The Force Awakens.txt">Star Wars: The Force Awakens</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Fellowship of the Ring.txt">Lord of the Rings: The Fellowship of the Ring</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Two Towers.txt">Lord of the Rings: The Two Towers</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Return of the King.txt">Lord of the Rings: The Return of the King</SelectItem>
+              </SelectContent>
+            </Select>
 
           </div>
+        ) : (
+          <div className="flex justify-end">
+            <Select
+              value={movie}
+              onValueChange={setMovie}
+            >
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder='Select a movie' />
+              </SelectTrigger>
+              <SelectContent className="dark">
+                    <SelectItem value="Star Wars: The Phantom Menace.txt">Star Wars: The Phantom Menace</SelectItem>
+                    <SelectItem value="Star Wars: Attack of the Clones.txt">Star Wars: Attack of the Clones</SelectItem>
+                    <SelectItem value="Star Wars: Revenge of the Sith.txt">Star Wars: Revenge of the Sith</SelectItem>
+                    <SelectItem value="Star Wars: A New Hope.txt">Star Wars: A New Hope</SelectItem>
+                    <SelectItem value="Star Wars: The Empire Strikes Back.txt">Star Wars: The Empire Strikes Back</SelectItem>
+                    <SelectItem value="Star Wars: Return of the Jedi.txt">Star Wars: Return of the Jedi</SelectItem>
+                    <SelectItem value="Star Wars: The Force Awakens.txt">Star Wars: The Force Awakens</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Fellowship of the Ring.txt">Lord of the Rings: The Fellowship of the Ring</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Two Towers.txt">Lord of the Rings: The Two Towers</SelectItem>
+                    <SelectItem value="Lord of the Rings: The Return of the King.txt">Lord of the Rings: The Return of the King</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
         )}
 
         {/* Messages */}
@@ -233,9 +277,10 @@ The Lord of the Rings: The Return of the King</p>
         >
           <ChatInput
             value={input}
+            disabled={movie === ""}
             onKeyDown={onKeyDown}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a question about Star Wars or The Lord of the rings..."
+            placeholder="Type a question about the selected movie..."
             className="min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
           />
           <div className="flex items-center p-3 pt-0">
