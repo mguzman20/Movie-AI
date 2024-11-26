@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
 
+export const maxDuration = 60;
 const pinecone = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY || ''
 });
