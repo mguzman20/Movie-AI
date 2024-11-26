@@ -2,6 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Stream } from 'stream';
 
 const pinecone = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY || ''
@@ -9,16 +11,18 @@ const pinecone = new Pinecone({
 
 const INDEX_NAME = process.env.PINECONE_INDEX_NAME || '';
 
-export async function POST(req: NextRequest) {
-    const { message, movie } = await req.json();
 
+export async function POST(req: NextRequest) {
+    const configuration = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+    const { message, movie } = await req.json();
+    const model = configuration.getGenerativeModel({ model: 'gemini-pro' });
   
     try {
         // Retrieve context from the Pinecone index based on the query
         const context = await fetchContextFromPinecone(message, movie) as { movie: string, text: string }[];
 
         const formattedContext = context.map(
-            ({ movie, text }) => `Extract: ${text}`
+            ({ movie, text }) => `Text: ${text}`
         ).join('\n\n');
 
         const prompt = `
@@ -36,48 +40,26 @@ export async function POST(req: NextRequest) {
 
         console.log("Prompt:", prompt);
 
-
-        // Send the context and the query to the LLM model
-        const response = await fetch('http://tormenta.ing.puc.cl/api/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'integra-LLM',
-                prompt: prompt,
-                stream: true
-            }),
-        });
-
-        console.log(response);
+        const result = await model.generateContentStream(prompt);
 
         const stream = new ReadableStream({
             async start(controller) {
-                if (!response.body) {
-                    throw new Error("Response body is null");
+                try {
+                    for await (const chunk of result.stream) {
+                        const chunkText = chunk.text(); // Ensure you await for text extraction
+                        console.log(chunkText);
+                        controller.enqueue(chunkText); // Enqueue each chunk into the stream
+                    }
+                } catch (error) {
+                    console.error("Error reading stream:", error);
+                } finally {
+                    controller.close(); // Close the stream when done
                 }
-                const reader = response.body.getReader();
-
-                // Read chunks from the model's response and enqueue them to the stream
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    // Push each chunk to the controller
-                    controller.enqueue(value);
-                }
-                controller.close();
-            },
+            }
         });
 
-        return new NextResponse(stream, {
-            headers: {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            },
-        });
+        return new NextResponse(stream);
+
     } catch (error) {
         console.error("Error processing request:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

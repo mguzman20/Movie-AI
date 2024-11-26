@@ -70,6 +70,8 @@ export default function Home() {
         body: JSON.stringify({ message: input, movie: movie}),
       });
 
+      console.log("Response:", response);
+
       if (!response.body) {
         throw new Error("Response body is null");
       }
@@ -85,24 +87,15 @@ export default function Home() {
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n').filter(line => line.trim() !== "");
         for (const line of lines) {
-          try {
-              // Parse each line as a JSON object
-              const jsonResponse = JSON.parse(line);
+          const json = JSON.parse(line);
+          aiMessage.content += json.response;
+          setMessages((prev) => [...prev.filter(m => m.role !== 'assistant'), aiMessage]);
 
-              // Append the response to aiMessage content
-              aiMessage.content += jsonResponse.response;
-              
-              // Update messages to display the current content
-              setMessages((prev) => [...prev.filter(m => m.role !== 'assistant'), aiMessage]);
-
-              // Break if the JSON response is marked as done
-              if (jsonResponse.done) break;
-              
-          } catch (error) {
-              console.warn("Failed to parse JSON chunk:", error);
-          }
+          // Break if the JSON response is marked as done
+          if (json.done) break;
+        }
+  
       }
-    }
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
