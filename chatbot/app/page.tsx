@@ -64,38 +64,19 @@ export default function Home() {
       setIsGenerating(true);
 
       // Replace with your own API endpoint or backend service
-      const response = await fetch("/api/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input, movie: movie}),
       });
-
-      console.log("Response:", response);
-
-      if (!response.body) {
-        throw new Error("Response body is null");
+      
+      if (!res.ok) {
+        throw new Error("Failed to fetch response");
       }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let aiMessage = { role: "assistant", content: "" };
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Decode the chunk and try to parse it immediately as JSON
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim() !== "");
-        for (const line of lines) {
-          const json = JSON.parse(line);
-          aiMessage.content += json.response;
-          setMessages((prev) => [...prev.filter(m => m.role !== 'assistant'), aiMessage]);
-
-          // Break if the JSON response is marked as done
-          if (json.done) break;
-        }
-  
-      }
+      const data = await res.text();
+      const assistantMessage = { role: "assistant", content: data };
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {

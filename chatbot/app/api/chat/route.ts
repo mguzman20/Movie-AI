@@ -40,25 +40,9 @@ export async function POST(req: NextRequest) {
 
         console.log("Prompt:", prompt);
 
-        const result = await model.generateContentStream(prompt);
-
-        const stream = new ReadableStream({
-            async start(controller) {
-                try {
-                    for await (const chunk of result.stream) {
-                        const chunkText = chunk.text(); // Ensure you await for text extraction
-                        console.log(chunkText);
-                        controller.enqueue(chunkText); // Enqueue each chunk into the stream
-                    }
-                } catch (error) {
-                    console.error("Error reading stream:", error);
-                } finally {
-                    controller.close(); // Close the stream when done
-                }
-            }
-        });
-
-        return new NextResponse(stream);
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        return new NextResponse(text, { status: 200 } );
 
     } catch (error) {
         console.error("Error processing request:", error);
